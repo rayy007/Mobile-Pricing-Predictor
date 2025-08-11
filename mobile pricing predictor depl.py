@@ -198,7 +198,7 @@ if st.button("Predict Price Range"):
     values_avg_loop = values_avg + values_avg[:1]
     categories = radar_features + [radar_features[0]]
 
-    fig3, ax3 = plt.subplots(figsize=(5, 4), subplot_kw=dict(polar=True))
+    fig3, ax3 = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
     angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
     angles += angles[:1]
 
