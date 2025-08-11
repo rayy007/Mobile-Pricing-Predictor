@@ -29,7 +29,7 @@ def set_background(image_file):
     except Exception:
         pass
 
-set_background("mobilephonebg.png")
+set_background("mob2.png")
 
 # ---------------------------
 # Load model and dataset
