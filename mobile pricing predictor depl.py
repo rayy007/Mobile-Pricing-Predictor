@@ -156,7 +156,7 @@ if st.button("Predict Price Range"):
       # --- Dashboard Style: One plot per feature ---
     st.subheader("📊 Feature Dashboard")
 
-    dashboard_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
+    dashboard_features = ["ram", "battery_power", "talk_time", "total_camera_mp"]
 
     avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][dashboard_features].mean()
     your_values = processed_df.iloc[0][dashboard_features]
@@ -165,7 +165,7 @@ if st.button("Predict Price Range"):
 
     for i, feature in enumerate(dashboard_features):
         with cols[i]:
-            fig_feat, ax_feat = plt.subplots(figsize=(3, 2))
+            fig_feat, ax_feat = plt.subplots(figsize=(8, 4))
             ax_feat.barh(["Your Phone"], [your_values[feature]], color="#4CAF50", alpha=0.7)
             ax_feat.scatter(avg_pred_class[feature], ["Your Phone"], color="red", zorder=5, label="Avg in Class")
             ax_feat.set_title(feature)
