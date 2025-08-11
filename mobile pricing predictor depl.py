@@ -170,7 +170,7 @@ if st.button("Predict Price Range"):
 
 
     # --- 2x2 Feature Dashboard: Avg vs Your Phone (two bars per plot) ---
-    st.subheader("📊 Feature Comparison (Avg in Predicted Class vs Your Phone)")
+    st.markdown("<h3 style='color: white;'>📊 Feature Comparison (Avg in Predicted Class vs Your Phone)</h3>", unsafe_allow_html=True)
     dashboard_features = ["ram", "battery_power", "talk_time", "total_camera_mp"]  # you can edit features
 
     avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][dashboard_features].mean()
