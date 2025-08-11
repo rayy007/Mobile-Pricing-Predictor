@@ -152,14 +152,16 @@ scaled_input = scaler.transform(processed_df)
 # Predict (use scaled_input)
 if st.button("Predict Price Range"):
     prediction = model.predict(scaled_input)[0]
-    # Use predict_proba if your model supports it
     try:
         prediction_proba = model.predict_proba(scaled_input)[0]
     except Exception:
         prediction_proba = None
 
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
-    st.success(f"💡 Predicted Price Range: **{label_map.get(prediction, prediction)}**")
+    st.markdown(
+        f"<span style='color: #1E90FF; font-weight: bold;'>💡 Predicted Price Range: {label_map.get(prediction, prediction)}</span>",
+        unsafe_allow_html=True
+    )
 
     # Prepare engineered training dataset for comparisons
     engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
