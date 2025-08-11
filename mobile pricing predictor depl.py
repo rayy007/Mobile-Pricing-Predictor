@@ -82,7 +82,7 @@ scaler = MinMaxScaler().fit(X_train_processed)
 # ---------------------------
 # UI header
 # ---------------------------
-st.markdown("<h1 style='color: #FFFF00; text-align: left;'>📱 Mobile Phone Price Range Prediction</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='color: 	#00FA9A; text-align: left;'>📱 Mobile Phone Price Range Prediction</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='color: #FFFFFF; text-align: left;'>Enter mobile specifications to predict the price range</h3>", unsafe_allow_html=True)
 
 st.sidebar.header("📥 Input Mobile Specifications")
