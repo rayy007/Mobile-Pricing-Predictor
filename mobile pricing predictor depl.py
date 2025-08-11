@@ -75,11 +75,11 @@ scaler = MinMaxScaler().fit(X_train_processed)
 # Streamlit UI
 # ---------------------------
 st.markdown(
-    "<h1 style='color: #E91E63; text-align: center;'>📱 Mobile Phone Price Range Prediction</h1>",
+    "<h1 style='color: #E91E63; text-align: left;'>📱 Mobile Phone Price Range Prediction</h1>",
     unsafe_allow_html=True
 )
 st.markdown(
-    "<h1 style='color: #00FFFF; text-align: center;'>Enter mobile specifications to predict the price range</h1>",
+    "<h3 style='color: #FFFFFF; text-align: left;'>Enter mobile specifications to predict the price range</h3>",
     unsafe_allow_html=True
 )
 
