@@ -165,16 +165,14 @@ if st.button("Predict Price Range"):
     # Your phone's values
     your_values = processed_df.iloc[0][dashboard_features]
 
-    # Make 2 rows × 2 columns layout
-    for row in range(0, len(dashboard_features), 2):
+     for row in range(0, len(dashboard_features), 2):
         cols = st.columns(2)
         for col_idx, feature in enumerate(dashboard_features[row:row+2]):
             with cols[col_idx]:
                 fig_feat, ax_feat = plt.subplots(figsize=(3.5, 2.5))
-                ax_feat.barh(["Your Phone"], [your_values[feature]], color="#4CAF50", alpha=0.7)
-                ax_feat.scatter(avg_pred_class[feature], ["Your Phone"], color="red", zorder=5, label="Avg in Class")
+                ax_feat.bar(["Avg in Class", "Your Phone"], 
+                            [avg_pred_class[feature], your_values[feature]],
+                            color=["#1E90FF", "#4CAF50"], alpha=0.8)
                 ax_feat.set_title(feature)
-                ax_feat.set_xlabel("Value")
-                ax_feat.legend(fontsize=6)
+                ax_feat.set_ylabel("Value")
                 st.pyplot(fig_feat)
-
