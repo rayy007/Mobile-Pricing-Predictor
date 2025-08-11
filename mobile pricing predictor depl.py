@@ -151,40 +151,36 @@ if st.button("Predict Price Range"):
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
 
-   # --- Benchmark Bars (Single Graph) ---
-    st.subheader("📊 Feature Benchmark Comparison")
+    # --- Dashboard Style Feature Comparison ---
+    st.subheader("📊 Feature Dashboard")
 
-    benchmark_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
+    dashboard_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
 
     # Prepare engineered training data
     engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
     engineered_train["price_range"] = train_data["price_range"]
 
-    # Get average per class
-    avg_per_class = engineered_train.groupby("price_range")[benchmark_features].mean()
+    # Get averages for predicted class
+    avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][dashboard_features].mean()
 
-    # Add your phone's row
-    avg_per_class.loc["Your Phone"] = processed_df.iloc[0][benchmark_features]
+    # Get your phone's values
+    your_values = processed_df.iloc[0][dashboard_features]
 
-    # Reshape for grouped bar plot
-    df_melted = avg_per_class.reset_index().melt(id_vars="price_range", var_name="Feature", value_name="Value")
+    fig_dash, ax_dash = plt.subplots(figsize=(7, 4))
+    y_positions = np.arange(len(dashboard_features))
 
-    # Plot grouped bar chart
-    fig2, ax2 = plt.subplots(figsize=(8, 5))
-    categories = df_melted["price_range"].unique()
+    # Plot your phone's values
+    ax_dash.barh(y_positions, your_values, color="#4CAF50", alpha=0.7, label="Your Phone")
 
-    bar_width = 0.15
-    features = df_melted["Feature"].unique()
-    x = np.arange(len(features))
+    # Add predicted class averages as markers
+    ax_dash.scatter(avg_pred_class, y_positions, color="red", zorder=5, label="Avg in Predicted Class")
 
-    for i, category in enumerate(categories):
-        subset = df_melted[df_melted["price_range"] == category]
-        ax2.bar(x + i * bar_width, subset["Value"], width=bar_width, label=category)
+    # Formatting
+    ax_dash.set_yticks(y_positions)
+    ax_dash.set_yticklabels(dashboard_features)
+    ax_dash.invert_yaxis()  # Highest feature at top
+    ax_dash.set_xlabel("Value")
+    ax_dash.set_title("Your Phone vs Average (Predicted Class)")
+    ax_dash.legend()
 
-    ax2.set_xticks(x + bar_width * (len(categories) - 1) / 2)
-    ax2.set_xticklabels(features)
-    ax2.set_ylabel("Value")
-    ax2.set_title("Feature Comparison Across Classes")
-    ax2.legend(title="Category")
-
-    st.pyplot(fig2)
+    st.pyplot(fig_dash)
