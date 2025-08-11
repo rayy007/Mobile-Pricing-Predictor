@@ -151,21 +151,45 @@ if st.button("Predict Price Range"):
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
 
-    # --- Lollipop Chart ---
-    fig, ax = plt.subplots()
-    class_names = [label_map[i] for i in range(len(prediction_proba))]
-    x_pos = np.arange(len(class_names))
-    ax.vlines(x=x_pos, ymin=0, ymax=prediction_proba, color='skyblue', linewidth=3)
-    ax.scatter(x_pos, prediction_proba, color='blue', s=200, zorder=3)
-    ax.set_xticks(x_pos)
-    ax.set_xticklabels(class_names)
-    ax.set_ylabel("Probability")
-    ax.set_xlabel("Price Range")
-    ax.set_ylim(0, 1)
-    ax.set_title("Prediction Probability (Lollipop Chart)")
-    for i, v in enumerate(prediction_proba):
-        ax.text(i, v + 0.02, f"{v:.2f}", ha='center', fontsize=10)
-    st.pyplot(fig)
+        # --- Radar Chart ---
+    st.subheader("📈 Feature Profile (Radar Chart)")
+
+    radar_features = ["ram", "battery_power", "pixel_area", "total_camera_mp", "screen_ratio"]
+
+    # Get averages for predicted class
+    avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
+
+    # Prepare data
+    values_user = processed_df.iloc[0][radar_features].values.tolist()
+    values_avg = avg_pred_class.values.tolist()
+
+    # Close the loop for radar chart
+    values_user += values_user[:1]
+    values_avg += values_avg[:1]
+
+    categories = radar_features
+    categories += categories[:1]
+
+    # Create radar chart
+    fig3, ax3 = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+    angles += angles[:1]
+
+    # Plot average
+    ax3.plot(angles, values_avg, color='blue', linewidth=2, label='Average in Predicted Class')
+    ax3.fill(angles, values_avg, color='blue', alpha=0.25)
+
+    # Plot user phone
+    ax3.plot(angles, values_user, color='red', linewidth=2, label='Your Phone')
+    ax3.fill(angles, values_user, color='red', alpha=0.25)
+
+    ax3.set_xticks(angles[:-1])
+    ax3.set_xticklabels(radar_features)
+    ax3.set_title("Feature Comparison with Predicted Class")
+    ax3.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+
+    st.pyplot(fig3)
+
 
     # --- Benchmark Bars ---
     st.subheader("📊 Feature Benchmark Comparison")
