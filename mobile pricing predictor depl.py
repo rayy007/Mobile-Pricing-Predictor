@@ -151,7 +151,7 @@ processed_df = processed_df[feature_order]
 scaled_input = scaler.transform(processed_df)
 
 # Predict (use scaled_input)
-if st.button("Predict Price Range"):
+if st.button("Predict 🏷️Price Range"):
     prediction = model.predict(scaled_input)[0]
     try:
         prediction_proba = model.predict_proba(scaled_input)[0]
