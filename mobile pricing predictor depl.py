@@ -69,7 +69,6 @@ def feature_engineering(df):
 # ---------------------------
 X_train = train_data.drop(columns="price_range")
 X_train_processed = feature_engineering(X_train.copy())
-scaler = MinMaxScaler().fit(X_train_processed)
 
 # ---------------------------
 # Streamlit UI
@@ -141,12 +140,11 @@ st.write(input_df)
 
 # Feature engineering + scaling
 processed_df = feature_engineering(input_df.copy())
-scaled_input = scaler.transform(processed_df)
 
 # Predict
 if st.button("Predict Price Range"):
-    prediction = model.predict(scaled_input)[0]
-    prediction_proba = model.predict_proba(scaled_input)[0]
+    prediction = model.predict(processed_df)[0]
+    prediction_proba = model.predict_proba(processed_df)[0]
 
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
