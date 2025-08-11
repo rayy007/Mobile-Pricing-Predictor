@@ -151,36 +151,23 @@ if st.button("Predict Price Range"):
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
 
-    # --- Dashboard Style Feature Comparison ---
+      # --- Dashboard Style: One plot per feature ---
     st.subheader("📊 Feature Dashboard")
 
     dashboard_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
 
-    # Prepare engineered training data
-    engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
-    engineered_train["price_range"] = train_data["price_range"]
-
-    # Get averages for predicted class
     avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][dashboard_features].mean()
-
-    # Get your phone's values
     your_values = processed_df.iloc[0][dashboard_features]
 
-    fig_dash, ax_dash = plt.subplots(figsize=(7, 4))
-    y_positions = np.arange(len(dashboard_features))
+    cols = st.columns(len(dashboard_features))  # One column per feature
 
-    # Plot your phone's values
-    ax_dash.barh(y_positions, your_values, color="#4CAF50", alpha=0.7, label="Your Phone")
+    for i, feature in enumerate(dashboard_features):
+        with cols[i]:
+            fig_feat, ax_feat = plt.subplots(figsize=(3, 2))
+            ax_feat.barh(["Your Phone"], [your_values[feature]], color="#4CAF50", alpha=0.7)
+            ax_feat.scatter(avg_pred_class[feature], ["Your Phone"], color="red", zorder=5, label="Avg in Class")
+            ax_feat.set_title(feature)
+            ax_feat.set_xlabel("Value")
+            ax_feat.legend(fontsize=6)
+            st.pyplot(fig_feat)
 
-    # Add predicted class averages as markers
-    ax_dash.scatter(avg_pred_class, y_positions, color="red", zorder=5, label="Avg in Predicted Class")
-
-    # Formatting
-    ax_dash.set_yticks(y_positions)
-    ax_dash.set_yticklabels(dashboard_features)
-    ax_dash.invert_yaxis()  # Highest feature at top
-    ax_dash.set_xlabel("Value")
-    ax_dash.set_title("Your Phone vs Average (Predicted Class)")
-    ax_dash.legend()
-
-    st.pyplot(fig_dash)
