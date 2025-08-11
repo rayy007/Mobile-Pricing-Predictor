@@ -151,15 +151,25 @@ if st.button("Predict Price Range"):
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
 
-    # Plot probabilities
+    # Lollipop Chart
     fig, ax = plt.subplots()
     class_names = [label_map[i] for i in range(len(prediction_proba))]
-    ax.bar(class_names, prediction_proba, color=["#4CAF50", "#FFC107", "#2196F3", "#E91E63"])
+    x_pos = np.arange(len(class_names))
+
+    # Plot sticks
+    ax.vlines(x=x_pos, ymin=0, ymax=prediction_proba, color='skyblue', linewidth=3)
+    # Plot circles
+    ax.scatter(x_pos, prediction_proba, color='blue', s=200, zorder=3)
+
+    # Formatting
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(class_names)
     ax.set_ylabel("Probability")
     ax.set_xlabel("Price Range")
     ax.set_ylim(0, 1)
-    ax.set_title("Prediction Probability Distribution")
+    ax.set_title("Prediction Probability (Lollipop Chart)")
 
+    # Add probability text
     for i, v in enumerate(prediction_proba):
         ax.text(i, v + 0.02, f"{v:.2f}", ha='center', fontsize=10)
 
