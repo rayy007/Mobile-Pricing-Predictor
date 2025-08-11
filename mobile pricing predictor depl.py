@@ -150,6 +150,8 @@ if st.button("Predict Price Range"):
 
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
+    engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
+    engineered_train["price_range"] = train_data["price_range"]
 
       # --- Dashboard Style: One plot per feature ---
     st.subheader("📊 Feature Dashboard")
