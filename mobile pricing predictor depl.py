@@ -138,7 +138,7 @@ def user_input_features():
 # Main App
 # ---------------------------
 input_df = user_input_features()
-st.markdown("<h3 style='color: white;'>🔍 User Input</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color: white;'> 📝 User Input</h3>", unsafe_allow_html=True)
 st.write(input_df)
 
 # Apply same feature engineering as training
@@ -151,7 +151,7 @@ processed_df = processed_df[feature_order]
 scaled_input = scaler.transform(processed_df)
 
 # Predict (use scaled_input)
-if st.button("Predict 🏷️Price Range"):
+if st.button("🔎 Predict Price Range 📈"):
     prediction = model.predict(scaled_input)[0]
     try:
         prediction_proba = model.predict_proba(scaled_input)[0]
