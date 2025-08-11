@@ -160,7 +160,7 @@ if st.button("Predict Price Range"):
 
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.markdown(
-        f"<span style='color: #1E90FF; font-weight: bold;'>💡 Predicted Price Range: {label_map.get(prediction, prediction)}</span>",
+        f"<span style='color: #1E90FF; font-weight: bold; font-size: 20px;'>💡 Predicted Price Range: {label_map.get(prediction, prediction)}</span>",
         unsafe_allow_html=True
     )
 
