@@ -185,23 +185,25 @@ if st.button("Predict Price Range"):
                 ax_feat.set_title(feature)
                 ax_feat.set_ylabel("Value")
                 st.pyplot(fig_feat)
-
     # --- Radar Chart: Your phone vs avg of predicted class ---
     st.subheader("📈 Radar Chart (Your Phone vs Average in Predicted Class)")
-    radar_features = ["ram", "battery_power", "talk_time", "total_camera_mp"]
-    avg_pred_class_radar = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
-    values_user = processed_df.iloc[0][radar_features].values.tolist()
-    values_avg = avg_pred_class_radar.values.tolist()
+    radar_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
 
-    # close the loop
+    # Average for predicted class
+    avg_pred_class_radar = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
+    values_user = processed_df.iloc[0][radar_features].tolist()
+    values_avg = avg_pred_class_radar.tolist()
+
+    # Close the loop for radar
     values_user_loop = values_user + values_user[:1]
     values_avg_loop = values_avg + values_avg[:1]
-    categories = radar_features + [radar_features[0]]
 
-    fig3, ax3 = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
-    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+    # Angles
+    angles = np.linspace(0, 2 * np.pi, len(radar_features), endpoint=False).tolist()
     angles += angles[:1]
 
+    # Plot
+    fig3, ax3 = plt.subplots(figsize=(5, 4), subplot_kw=dict(polar=True))
     ax3.plot(angles, values_avg_loop, color='blue', linewidth=1.5, label='Avg in Class')
     ax3.fill(angles, values_avg_loop, color='blue', alpha=0.15)
     ax3.plot(angles, values_user_loop, color='red', linewidth=1.5, label='Your Phone')
@@ -211,3 +213,6 @@ if st.button("Predict Price Range"):
     ax3.set_title("Feature Profile vs Predicted Class")
     ax3.legend(loc='upper right', bbox_to_anchor=(1.2, 1.1))
     st.pyplot(fig3)
+
+    
+
