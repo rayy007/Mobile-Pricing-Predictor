@@ -5,6 +5,29 @@ import joblib
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
+# Set background image
+# -------------------------
+def set_background(image_file):
+    with open(image_file, "rb") as img_file:
+        encoded_string = base64.b64encode(img_file.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{encoded_string}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+set_background("mobilephonebg.png")
+
 # ---------------------------
 # Load model and dataset
 # ---------------------------
