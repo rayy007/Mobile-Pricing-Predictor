@@ -165,7 +165,7 @@ if st.button("Predict Price Range"):
     # Your phone's values
     your_values = processed_df.iloc[0][dashboard_features]
 
-     for row in range(0, len(dashboard_features), 2):
+    for row in range(0, len(dashboard_features), 2):
         cols = st.columns(2)
         for col_idx, feature in enumerate(dashboard_features[row:row+2]):
             with cols[col_idx]:
@@ -175,4 +175,4 @@ if st.button("Predict Price Range"):
                             color=["#1E90FF", "#4CAF50"], alpha=0.8)
                 ax_feat.set_title(feature)
                 ax_feat.set_ylabel("Value")
-                st.pyplot(fig_feat)
+                st.pyplot(fig_feat) 
