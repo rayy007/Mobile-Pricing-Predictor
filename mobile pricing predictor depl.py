@@ -1,3 +1,4 @@
+# streamlit_app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,37 +6,39 @@ import joblib
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import base64
-# Set background image
-# -------------------------
-def set_background(image_file):
-    with open(image_file, "rb") as img_file:
-        encoded_string = base64.b64encode(img_file.read()).decode()
 
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/jpg;base64,{encoded_string}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# Optional: background image function (keeps from your file)
+def set_background(image_file):
+    try:
+        with open(image_file, "rb") as img_file:
+            encoded_string = base64.b64encode(img_file.read()).decode()
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url("data:image/jpg;base64,{encoded_string}");
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    except Exception:
+        pass
 
 set_background("mobilephonebg.png")
 
 # ---------------------------
 # Load model and dataset
 # ---------------------------
-model = joblib.load("el_model.pkl")  # Your trained Elastic Net model
-train_data = pd.read_csv("Mobile Phone Pricing.csv")  # Used to fit scaler
+model = joblib.load("el_model.pkl")  # trained ElasticNet classifier
+train_data = pd.read_csv("Mobile Phone Pricing.csv")  # used to fit scaler & class averages
 
 # ---------------------------
-# Feature Engineering Function
+# Feature Engineering Function (same as training)
 # ---------------------------
 def feature_engineering(df):
     # Outlier capping for fc and px_height
@@ -65,23 +68,22 @@ def feature_engineering(df):
     return df
 
 # ---------------------------
-# Fit scaler on training data
+# Prepare scaler and reference processed train set (to match training)
 # ---------------------------
 X_train = train_data.drop(columns="price_range")
 X_train_processed = feature_engineering(X_train.copy())
 
-# ---------------------------
-# Streamlit UI
-# ---------------------------
-st.markdown(
-    "<h1 style='color: #1E90FF; text-align: left;'>📱 Mobile Phone Price Range Prediction</h1>",
-    unsafe_allow_html=True
-)
-st.markdown(
-    "<h3 style='color: #FFFFFF; text-align: left;'>Enter mobile specifications to predict the price range</h3>",
-    unsafe_allow_html=True
-)
+# IMPORTANT: save feature order that the scaler/model expect
+feature_order = X_train_processed.columns.tolist()
 
+# Fit MinMaxScaler on processed training features (this mirrors training scaling)
+scaler = MinMaxScaler().fit(X_train_processed)
+
+# ---------------------------
+# UI header
+# ---------------------------
+st.markdown("<h1 style='color: #1E90FF; text-align: left;'>📱 Mobile Phone Price Range Prediction</h1>", unsafe_allow_html=True)
+st.markdown("<h3 style='color: #FFFFFF; text-align: left;'>Enter mobile specifications to predict the price range</h3>", unsafe_allow_html=True)
 
 st.sidebar.header("📥 Input Mobile Specifications")
 
@@ -138,39 +140,88 @@ input_df = user_input_features()
 st.subheader("🔍 User Input")
 st.write(input_df)
 
-# Feature engineering + scaling
+# Apply same feature engineering as training
 processed_df = feature_engineering(input_df.copy())
 
-# Predict
+# Reorder processed_df columns exactly as in training
+processed_df = processed_df[feature_order]
+
+# Scale input using scaler fitted on training data
+scaled_input = scaler.transform(processed_df)
+
+# Predict (use scaled_input)
 if st.button("Predict Price Range"):
-    prediction = model.predict(processed_df)[0]
-    prediction_proba = model.predict_proba(processed_df)[0]
+    prediction = model.predict(scaled_input)[0]
+    # Use predict_proba if your model supports it
+    try:
+        prediction_proba = model.predict_proba(scaled_input)[0]
+    except Exception:
+        prediction_proba = None
 
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
-    st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
-        # Prepare engineered training dataset for comparisons
+    st.success(f"💡 Predicted Price Range: **{label_map.get(prediction, prediction)}**")
+
+    # Prepare engineered training dataset for comparisons
     engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
     engineered_train["price_range"] = train_data["price_range"]
 
-    # --- Dashboard Style: 2 Rows × 2 Columns ---
-    st.subheader("📊 Feature Dashboard")
+    # --- Lollipop Chart (probabilities) ---
+    if prediction_proba is not None:
+        fig, ax = plt.subplots(figsize=(3.2, 3))
+        class_names = [label_map[i] for i in range(len(prediction_proba))]
+        x_pos = np.arange(len(class_names))
+        ax.vlines(x=x_pos, ymin=0, ymax=prediction_proba, color='skyblue', linewidth=3)
+        ax.scatter(x_pos, prediction_proba, color='blue', s=80, zorder=3)
+        ax.set_xticks(x_pos)
+        ax.set_xticklabels(class_names, rotation=45)
+        ax.set_ylim(0, 1)
+        ax.set_title("Prediction Probabilities")
+        for i, v in enumerate(prediction_proba):
+            ax.text(i, v + 0.02, f"{v:.2f}", ha='center', fontsize=8)
+        st.pyplot(fig)
 
-    dashboard_features = ["ram", "battery_power", "talk_time", "total_camera_mp"]
+    # --- 2x2 Feature Dashboard: Avg vs Your Phone (two bars per plot) ---
+    st.subheader("📊 Feature Comparison (Avg in Predicted Class vs Your Phone)")
+    dashboard_features = ["ram", "battery_power", "px_width", "total_camera_mp"]  # you can edit features
 
-    # Average values for predicted class
     avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][dashboard_features].mean()
-
-    # Your phone's values
     your_values = processed_df.iloc[0][dashboard_features]
 
+    # Make 2x2 layout
     for row in range(0, len(dashboard_features), 2):
         cols = st.columns(2)
         for col_idx, feature in enumerate(dashboard_features[row:row+2]):
             with cols[col_idx]:
-                fig_feat, ax_feat = plt.subplots(figsize=(3.5, 2.5))
-                ax_feat.bar(["Avg in Class", "Your Phone"], 
+                fig_feat, ax_feat = plt.subplots(figsize=(4, 3))
+                ax_feat.bar(["Avg in Class", "Your Phone"],
                             [avg_pred_class[feature], your_values[feature]],
-                            color=["#1E90FF", "#4CAF50"], alpha=0.8)
+                            color=["#1E90FF", "#4CAF50"], alpha=0.9)
                 ax_feat.set_title(feature)
                 ax_feat.set_ylabel("Value")
-                st.pyplot(fig_feat) 
+                st.pyplot(fig_feat)
+
+    # --- Radar Chart: Your phone vs avg of predicted class ---
+    st.subheader("📈 Radar Chart (Your Phone vs Average in Predicted Class)")
+    radar_features = ["ram", "battery_power", "pixel_area", "total_camera_mp", "screen_ratio"]
+    avg_pred_class_radar = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
+    values_user = processed_df.iloc[0][radar_features].values.tolist()
+    values_avg = avg_pred_class_radar.values.tolist()
+
+    # close the loop
+    values_user_loop = values_user + values_user[:1]
+    values_avg_loop = values_avg + values_avg[:1]
+    categories = radar_features + [radar_features[0]]
+
+    fig3, ax3 = plt.subplots(figsize=(5, 4), subplot_kw=dict(polar=True))
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+    angles += angles[:1]
+
+    ax3.plot(angles, values_avg_loop, color='blue', linewidth=1.5, label='Avg in Class')
+    ax3.fill(angles, values_avg_loop, color='blue', alpha=0.15)
+    ax3.plot(angles, values_user_loop, color='red', linewidth=1.5, label='Your Phone')
+    ax3.fill(angles, values_user_loop, color='red', alpha=0.15)
+    ax3.set_xticks(angles[:-1])
+    ax3.set_xticklabels(radar_features, fontsize=9)
+    ax3.set_title("Feature Profile vs Predicted Class")
+    ax3.legend(loc='upper right', bbox_to_anchor=(1.2, 1.1))
+    st.pyplot(fig3)
