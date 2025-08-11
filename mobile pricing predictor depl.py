@@ -150,26 +150,31 @@ if st.button("Predict Price Range"):
 
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
+        # Prepare engineered training dataset for comparisons
     engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
     engineered_train["price_range"] = train_data["price_range"]
 
-      # --- Dashboard Style: One plot per feature ---
+    # --- Dashboard Style: 2 Rows × 2 Columns ---
     st.subheader("📊 Feature Dashboard")
 
     dashboard_features = ["ram", "battery_power", "talk_time", "total_camera_mp"]
 
+    # Average values for predicted class
     avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][dashboard_features].mean()
+
+    # Your phone's values
     your_values = processed_df.iloc[0][dashboard_features]
 
-    cols = st.columns(len(dashboard_features))  # One column per feature
-
-    for i, feature in enumerate(dashboard_features):
-        with cols[i]:
-            fig_feat, ax_feat = plt.subplots(figsize=(8, 4))
-            ax_feat.barh(["Your Phone"], [your_values[feature]], color="#4CAF50", alpha=0.7)
-            ax_feat.scatter(avg_pred_class[feature], ["Your Phone"], color="red", zorder=5, label="Avg in Class")
-            ax_feat.set_title(feature)
-            ax_feat.set_xlabel("Value")
-            ax_feat.legend(fontsize=6)
-            st.pyplot(fig_feat)
+    # Make 2 rows × 2 columns layout
+    for row in range(0, len(dashboard_features), 2):
+        cols = st.columns(2)
+        for col_idx, feature in enumerate(dashboard_features[row:row+2]):
+            with cols[col_idx]:
+                fig_feat, ax_feat = plt.subplots(figsize=(3.5, 2.5))
+                ax_feat.barh(["Your Phone"], [your_values[feature]], color="#4CAF50", alpha=0.7)
+                ax_feat.scatter(avg_pred_class[feature], ["Your Phone"], color="red", zorder=5, label="Avg in Class")
+                ax_feat.set_title(feature)
+                ax_feat.set_xlabel("Value")
+                ax_feat.legend(fontsize=6)
+                st.pyplot(fig_feat)
 
