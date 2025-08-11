@@ -188,7 +188,7 @@ if st.button("Predict Price Range"):
 
     # --- Radar Chart: Your phone vs avg of predicted class ---
     st.subheader("📈 Radar Chart (Your Phone vs Average in Predicted Class)")
-    radar_features = ["ram", "battery_power", "talk_time", "total_camera_mp", "screen_ratio"]
+    radar_features = ["ram", "battery_power", "talk_time", "total_camera_mp"]
     avg_pred_class_radar = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
     values_user = processed_df.iloc[0][radar_features].values.tolist()
     values_avg = avg_pred_class_radar.values.tolist()
