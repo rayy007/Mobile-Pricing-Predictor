@@ -165,20 +165,6 @@ if st.button("Predict Price Range"):
     engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
     engineered_train["price_range"] = train_data["price_range"]
 
-    # --- Lollipop Chart (probabilities) ---
-    if prediction_proba is not None:
-        fig, ax = plt.subplots(figsize=(3.2, 3))
-        class_names = [label_map[i] for i in range(len(prediction_proba))]
-        x_pos = np.arange(len(class_names))
-        ax.vlines(x=x_pos, ymin=0, ymax=prediction_proba, color='skyblue', linewidth=3)
-        ax.scatter(x_pos, prediction_proba, color='blue', s=80, zorder=3)
-        ax.set_xticks(x_pos)
-        ax.set_xticklabels(class_names, rotation=45)
-        ax.set_ylim(0, 1)
-        ax.set_title("Prediction Probabilities")
-        for i, v in enumerate(prediction_proba):
-            ax.text(i, v + 0.02, f"{v:.2f}", ha='center', fontsize=8)
-        st.pyplot(fig)
 
     # --- 2x2 Feature Dashboard: Avg vs Your Phone (two bars per plot) ---
     st.subheader("📊 Feature Comparison (Avg in Predicted Class vs Your Phone)")
