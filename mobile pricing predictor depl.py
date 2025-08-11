@@ -151,26 +151,38 @@ if st.button("Predict Price Range"):
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
 
-    # Lollipop Chart
+    # --- Lollipop Chart ---
     fig, ax = plt.subplots()
     class_names = [label_map[i] for i in range(len(prediction_proba))]
     x_pos = np.arange(len(class_names))
-
-    # Plot sticks
     ax.vlines(x=x_pos, ymin=0, ymax=prediction_proba, color='skyblue', linewidth=3)
-    # Plot circles
     ax.scatter(x_pos, prediction_proba, color='blue', s=200, zorder=3)
-
-    # Formatting
     ax.set_xticks(x_pos)
     ax.set_xticklabels(class_names)
     ax.set_ylabel("Probability")
     ax.set_xlabel("Price Range")
     ax.set_ylim(0, 1)
     ax.set_title("Prediction Probability (Lollipop Chart)")
-
-    # Add probability text
     for i, v in enumerate(prediction_proba):
         ax.text(i, v + 0.02, f"{v:.2f}", ha='center', fontsize=10)
-
     st.pyplot(fig)
+
+    # --- Benchmark Bars ---
+    st.subheader("📊 Feature Benchmark Comparison")
+    benchmark_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
+
+    engineered_train = feature_engineering(train_data.drop(columns="price_range").copy())
+    engineered_train["price_range"] = train_data["price_range"]
+
+    avg_per_class = engineered_train.groupby("price_range")[benchmark_features].mean()
+    comparison_df = avg_per_class.copy()
+    comparison_df.loc["Your Phone"] = processed_df.iloc[0][benchmark_features]
+
+    for feature in benchmark_features:
+        fig2, ax2 = plt.subplots()
+        comparison_df[feature].plot(kind="bar", ax=ax2,
+            color=["#4CAF50", "#FFC107", "#2196F3", "#E91E63", "#9C27B0"])
+        ax2.set_ylabel(feature)
+        ax2.set_title(f"{feature} Comparison")
+        ax2.set_xticklabels(["Low", "Medium", "High", "Very High", "Your Phone"], rotation=0)
+        st.pyplot(fig2)
