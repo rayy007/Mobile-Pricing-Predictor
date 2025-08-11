@@ -4,7 +4,7 @@ import numpy as np
 import joblib
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
-
+import base64
 # Set background image
 # -------------------------
 def set_background(image_file):
