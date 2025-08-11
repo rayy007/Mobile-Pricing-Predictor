@@ -151,46 +151,6 @@ if st.button("Predict Price Range"):
     label_map = {0: "Low", 1: "Medium", 2: "High", 3: "Very High"}
     st.success(f"💡 Predicted Price Range: **{label_map[prediction]}**")
 
-        # --- Radar Chart ---
-    st.subheader("📈 Feature Profile (Radar Chart)")
-
-    radar_features = ["ram", "battery_power", "pixel_area", "total_camera_mp", "screen_ratio"]
-
-    # Get averages for predicted class
-    avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
-
-    # Prepare data
-    values_user = processed_df.iloc[0][radar_features].values.tolist()
-    values_avg = avg_pred_class.values.tolist()
-
-    # Close the loop for radar chart
-    values_user += values_user[:1]
-    values_avg += values_avg[:1]
-
-    categories = radar_features
-    categories += categories[:1]
-
-    # Create radar chart
-    fig3, ax3 = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
-    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
-    angles += angles[:1]
-
-    # Plot average
-    ax3.plot(angles, values_avg, color='blue', linewidth=2, label='Average in Predicted Class')
-    ax3.fill(angles, values_avg, color='blue', alpha=0.25)
-
-    # Plot user phone
-    ax3.plot(angles, values_user, color='red', linewidth=2, label='Your Phone')
-    ax3.fill(angles, values_user, color='red', alpha=0.25)
-
-    ax3.set_xticks(angles[:-1])
-    ax3.set_xticklabels(radar_features)
-    ax3.set_title("Feature Comparison with Predicted Class")
-    ax3.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
-
-    st.pyplot(fig3)
-
-
     # --- Benchmark Bars ---
     st.subheader("📊 Feature Benchmark Comparison")
     benchmark_features = ["ram", "battery_power", "pixel_area", "total_camera_mp"]
@@ -210,3 +170,35 @@ if st.button("Predict Price Range"):
         ax2.set_title(f"{feature} Comparison")
         ax2.set_xticklabels(["Low", "Medium", "High", "Very High", "Your Phone"], rotation=0)
         st.pyplot(fig2)
+
+    st.subheader("📈 Feature Profile (Radar Chart)")
+    radar_features = ["ram", "battery_power", "pixel_area", "total_camera_mp", "screen_ratio"]
+
+    avg_pred_class = engineered_train[engineered_train["price_range"] == prediction][radar_features].mean()
+
+    values_user = processed_df.iloc[0][radar_features].values.tolist()
+    values_avg = avg_pred_class.values.tolist()
+
+    # Close loop
+    values_user += values_user[:1]
+    values_avg += values_avg[:1]
+    categories = radar_features + [radar_features[0]]
+
+    fig3, ax3 = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+    angles += angles[:1]
+
+    # Average
+    ax3.plot(angles, values_avg, color='blue', linewidth=2, label='Average in Predicted Class')
+    ax3.fill(angles, values_avg, color='blue', alpha=0.25)
+
+    # User phone
+    ax3.plot(angles, values_user, color='red', linewidth=2, label='Your Phone')
+    ax3.fill(angles, values_user, color='red', alpha=0.25)
+
+    ax3.set_xticks(angles[:-1])
+    ax3.set_xticklabels(radar_features)
+    ax3.set_title("Feature Comparison with Predicted Class")
+    ax3.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+
+    st.pyplot(fig3)
